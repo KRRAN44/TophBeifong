@@ -1,0 +1,305 @@
+// Si el Node instalado es muy viejo, mejor avisar claro que tronar feo más adelante
+const nodeVersion = process.versions.node
+const [nodeMajor, nodeMinor] = nodeVersion.split('.').map(Number)
+
+if (nodeMajor < 20 || (nodeMajor === 20 && nodeMinor < 9)) {
+  console.error(`\n❌ Este bot necesita Node.js 20.9.0 o más nuevo (lo piden baileys y sharp).`)
+  console.error(`   Tienes instalada la v${nodeVersion}.`)
+  console.error(`   Descarga una versión más nueva en https://nodejs.org y vuelve a intentar.\n`)
+  process.exit(1)
+}
+// bot tooru-mutsuki
+const { Boom } = require('@hapi/boom')
+  const P = require('pino')
+  const qrcode = require('qrcode-terminal')
+  const fs = require('fs')
+  const path = require('path')
+
+  const PREFIX = '!'
+  const logger = P({ level: 'silent' })
+
+  // Funciones para manejar el contador de mensajes
+  function cargarActivos() {
+    const activosPath = path.join(__dirname, 'JSON/activos.json')
+    if (!fs.existsSync(activosPath)) {
+      return {}
+    }
+    try {
+      return JSON.parse(fs.readFileSync(activosPath, 'utf8'))
+    } catch (error) {
+      console.error('Error al cargar activos.json:', error)
+      return {}
+    }
+  }
+
+  function guardarActivos(activos) {
+    const activosPath = path.join(__dirname, 'JSON/activos.json')
+    try {
+      fs.writeFileSync(activosPath, JSON.stringify(activos, null, 2), 'utf8')
+    } catch (error) {
+      console.error('Error al guardar activos.json:', error)
+    }
+  }
+
+  function incrementarContador(jid, usuario) {
+    const activos = cargarActivos()
+    
+    if (!activos[jid]) {
+      activos[jid] = {}
+    }
+    
+    if (!activos[jid][usuario]) {
+      activos[jid][usuario] = 0
+    }
+    
+    activos[jid][usuario]++
+    guardarActivos(activos)
+  }
+
+  // Carga todos los comandos .js de src/commands
+  function loadCommands() {
+    const commands = new Map()
+    const commandsPath = path.join(__dirname, 'commands')
+
+    function readFolder(folder) {
+      if (!fs.existsSync(folder)) return
+
+      for (const file of fs.readdirSync(folder)) {
+        const filePath = path.join(folder, file)
+        const stats = fs.statSync(filePath)
+
+        if (stats.isDirectory()) {
+          readFolder(filePath)
+          continue
+        }
+
+        if (!file.endsWith('.js')) continue
+
+        const command = require(filePath)
+
+        if (!command.name || typeof command.execute !== 'function') {
+          console.log(`Comando ignorado: ${filePath}`)
+          continue
+        }
+
+        commands.set(command.name.toLowerCase(), command)
+
+        if (Array.isArray(command.aliases)) {
+          for (const alias of command.aliases) {
+            commands.set(alias.toLowerCase(), command)
+          }
+        }
+      }
+    }
+
+const color = {
+    rojo: '\x1b[31m',
+    verde: '\x1b[32m',
+    amarillo: '\x1b[33m',
+    azul: '\x1b[34m',
+    morado: '\x1b[35m',
+    cyan: '\x1b[36m',
+    blanco: '\x1b[37m',
+    reset: '\x1b[0m'
+};
+
+    readFolder(commandsPath)
+    console.log(`${color.verde}═══════════════════════════════════════`)
+    console.log(`🪵            TOPH BEIFONG `)
+    console.log(`Comandos cargados correctamente.....`)
+    console.log(`${color.blanco}                Cantidad de comandos:  ${commands.size}`)
+    console.log(`${color.verde}═══════════════════════════════════════${color.reset}`)
+    return commands
+  }
+
+  const commands = loadCommands()
+
+  function getMessageText(message) {
+    const content = message.message
+
+    return (
+      content?.conversation ||
+      content?.extendedTextMessage?.text ||
+      content?.imageMessage?.caption ||
+      content?.videoMessage?.caption ||
+      ''
+    )
+  }
+
+  async function startBot() {
+    const {
+      default: makeWASocket,
+      DisconnectReason,
+      useMultiFileAuthState,
+      makeCacheableSignalKeyStore
+    } = await import('@whiskeysockets/baileys')
+
+    const { state, saveCreds } = await useMultiFileAuthState(
+      path.join(__dirname, 'info_TophBeifong')
+    )
+
+    const sock = makeWASocket({
+      auth: {
+        creds: state.creds,
+        keys: makeCacheableSignalKeyStore(state.keys, logger)
+      },
+      logger,
+      markOnlineOnConnect: false,
+      syncFullHistory: false
+    })
+
+    sock.ev.on('creds.update', saveCreds)
+
+    sock.ev.on('connection.update', ({ connection, lastDisconnect, qr }) => {
+      if (qr) {
+        console.log('\x1b[94m [\x1b[92m BEIFONG \x1b[94m] Escanea este código QR con tu WhatsApp para iniciar sesión, Dispositivos vinculados y despues agregar un nuevo dispositivo: \x1b[0m')
+        qrcode.generate(qr, { small: true })
+      }
+
+      if (connection === 'open') {
+        console.log('\x1b[94m [\x1b[92m BEIFONG \x1b[94m] Bot conectado correctamente, Disruta tu bot TophBeifong \x1b[0m')
+      }
+
+      if (connection === 'close') {
+        const statusCode = new Boom(lastDisconnect?.error)?.output?.statusCode
+        const reconnect = statusCode !== DisconnectReason.loggedOut
+
+        console.log('\x1b[94m [\x1b[92m BEIFONG \x1b[94m] Conexión cerrada.', reconnect ? 'Reconectando...' : 'Sesión cerrada. \x1b[0m')
+
+        if (reconnect) {
+          startBot()
+        } else {
+          console.log('\x1b[94m [\x1b[92m BEIFONG \x1b[94m] Sesion cerrada, busca y elimina la carpeta info_TophBeifong \x1b[0m')
+        }
+      }
+    })
+
+    sock.ev.on('messages.upsert', async ({ messages, type }) => {
+      if (type !== 'notify') return
+
+      const message = messages[0]
+      if (!message.message || message.key.fromMe) return
+
+      const jid = message.key.remoteJid
+
+     // Ignora estados
+      if (jid === 'status@broadcast') return
+
+      if (jid.endsWith('@g.us')) {
+        const autor = message.key.participant || message.key.remoteJid;
+        
+        // Incrementar el contador de mensajes
+        incrementarContador(jid, autor);
+        
+        const configPath = path.join(__dirname, 'config.json');
+
+        if (fs.existsSync(configPath)) {
+          const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
+          // Usuario muteado: se borra el mensaje y no se sigue procesando
+          if (config.mutes?.[jid]?.[autor]) {
+            try {
+              await sock.sendMessage(jid, { delete: message.key });
+            } catch (error) {
+              console.error('Error al borrar mensaje de usuario muteado:', error);
+            }
+            return;
+          }
+                    // Antilink: si está activado en el grupo, borra cualquier mensaje con https://
+          if (config.antilink?.[jid]?.enabled) {
+            const contenido = getMessageText(message);
+
+            if (contenido.includes('https://')) {
+              try {
+                await sock.sendMessage(jid, { delete: message.key });
+              } catch (error) {
+                console.error('Error al borrar mensaje con link:', error);
+              }
+              return;
+            }
+          }
+        }
+      }
+
+      const text = getMessageText(message).trim()
+      
+      // Ejemplo: !ping o !menu
+      if (!text.startsWith(PREFIX)) return
+
+      const commandText = text.slice(PREFIX.length).trim()
+const commandName = commandText.split(/\s+/)[0]?.toLowerCase()
+const args = commandText.slice(commandName.length).trimStart()
+
+      if (!commandName) return
+
+      const command = commands.get(commandName)
+
+      if (!command) {
+        await sock.sendMessage(jid, {
+          text: `_*[  🔅  ] Error! el comando: ${commandName} No existe…*_`
+        })
+        return
+      }
+
+      try {
+        await command.execute({
+          sock,
+          message,
+          jid,
+          args,
+          text,
+          prefix: PREFIX,
+          commands
+        })
+      } catch (error) {
+        console.error(`Error en ${commandName}:`, error)
+
+        await sock.sendMessage(jid, {
+          text: `_*[  🔅  ] Error! el comando tuvo un error al ser ejecutado, puede que este corrupto....*_`
+        })
+      }
+    })
+
+    sock.ev.on('group-participants.update', async (update) => {
+    try {
+        const { id, participants, action } = update
+
+        if (action !== 'add' && action !== 'remove') return
+
+        const configPath = path.join(__dirname, 'config.json')
+
+        if (!fs.existsSync(configPath)) return
+
+        const config = JSON.parse(
+            fs.readFileSync(configPath, 'utf8')
+        )
+
+        const clave = action === 'add' ? 'bienvenidas' : 'despedidas'
+        const emoji = action === 'add' ? '👋' : '👋😢'
+
+        const ajuste = config[clave]?.[id]
+
+        if (!ajuste || !ajuste.enabled || !ajuste.text) {
+            return
+        }
+
+       for (const participant of participants) {
+    const jid = typeof participant === 'string' ? participant : participant?.id;
+
+    if (!jid) continue;
+
+    await sock.sendMessage(id, {
+        text: `${emoji} @${jid.split('@')[0]} ${ajuste.text}`,
+        mentions: [jid]
+    });
+  }
+
+    } catch (error) {
+        console.error('Error en bienvenida/despedida:', error)
+    }
+
+})
+
+  }
+
+  startBot()
