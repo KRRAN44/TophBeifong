@@ -107,7 +107,7 @@ async execute({ sock, message, jid }) {
         const avisoAdmins = protegidos.length > 0
             ? `\n⚠️ No se expulsó a ${protegidos.length} administrador(es).`
             : '';
-
+        console.log(`        [ 🗺️ ] Comando KICK ejecutado con éxito, se expulsaron a los usuarios`);
         await sock.sendMessage(jid, {
             text: `═════════════════
 *🪵            KICK*
