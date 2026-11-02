@@ -62,7 +62,7 @@ module.exports = {
             console.log(`        [ 🗺️ ] Comando Warn ejecutado con éxito, se añadió una advertencia`);
             return sock.sendMessage(jid, {
                 text: `═════════════════
-*🪵            WARN *
+*🪵            WARN*
 > _el usuario fue añadido a la lista de warns, el usuario va en *${nuevo}* de *${MAX_WARNS}* permitidas.._
 ═════════════════
 𔑳ּ᠂࡛ܐׄ𝚻𝚶𝗣𝚮ꫂ𝚩𝚵𝚰𝙁𝛳𝛮𝙂 🌱`
@@ -90,7 +90,7 @@ module.exports = {
 
             await sock.sendMessage(jid, {
                 text: `═════════════════
-*🪵            WARN *
+*🪵            WARN*
 > _el usuario fue expulsado por llegar al limite de warns..._
 ═════════════════
 𔑳ּ᠂࡛ܐׄ𝚻𝚶𝗣𝚮ꫂ𝚩𝚵𝚰𝙁𝛳𝛮𝙂 🌱`
