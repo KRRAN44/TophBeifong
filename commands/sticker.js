@@ -51,7 +51,7 @@ module.exports = {
 async function procesarMediaAWebp(buffer, esImagen) {
     const inputPath = path.join(__dirname, `../temp_input_${Date.now()}.tmp`);
     const outputPath = path.join(__dirname, `../temp_output_${Date.now()}.webp`);
-
+    console.log(`        [ 🗺️ ] Procesando media a WebP: ${esImagen ? 'imagen' : 'video/GIF'}`);
     try {
         // Guardar buffer como archivo temporal
         fs.writeFileSync(inputPath, buffer);

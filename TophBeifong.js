@@ -8,7 +8,7 @@ if (nodeMajor < 20 || (nodeMajor === 20 && nodeMinor < 9)) {
   console.error(`   Descarga una versión más nueva en https://nodejs.org y vuelve a intentar.\n`)
   process.exit(1)
 }
-// bot tooru-mutsuki
+// bot toph beifong
 const { Boom } = require('@hapi/boom')
   const P = require('pino')
   const qrcode = require('qrcode-terminal')
@@ -191,7 +191,7 @@ const color = {
         // Incrementar el contador de mensajes
         incrementarContador(jid, autor);
         
-        const configPath = path.join(__dirname, 'config.json');
+        const configPath = path.join(__dirname, 'JSON/activos.json');
 
         if (fs.existsSync(configPath)) {
           const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));

@@ -85,7 +85,7 @@ try {
         [userToDemote],
         'demote'
     );
-
+    console.log(`        [ 🗺️ ] Comando Demote ejecutado con éxito, se degradó a miembro`);
     await sock.sendMessage(jid, {
         text: `═════════════
 *🪵            demote*

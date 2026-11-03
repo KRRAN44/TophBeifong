@@ -13,7 +13,7 @@ module.exports = {
         
         if (!texto) {
             return sock.sendMessage(jid, {
-                text: 'Escribe tu sugerencia. Ejemplo: !sug Agreguen un comando de memes'
+                text: '> *_[ 🍤 ] Escribe tu sugerencia. Ejemplo: !sug xxxxxxx_*'
             });
         }
         const esGrupo = jid.endsWith('@g.us');
