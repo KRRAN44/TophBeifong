@@ -207,28 +207,26 @@ const color = {
             return;
           }
                     // Antilink: si está activado en el grupo, borra cualquier mensaje con https://
-        // Antilink: lee su propio archivo
-if (fs.existsSync(antilinkPath)) {
-  try {
-    const antilinkConfig = JSON.parse(fs.readFileSync(antilinkPath, 'utf8'))
+                    // Antilink: lee su propio archivo
+                    if (fs.existsSync(antiLinkPath)) {
+                     try {
+                      const antiLinkConfig = JSON.parse(fs.readFileSync(antiLinkPath, 'utf8'))
 
-    if (antilinkConfig.antilink?.[jid]?.enabled) {
-      const contenido = getMessageText(message)
+                      if (antiLinkConfig.antilink?.[jid]?.enabled) {
+                        const contenido = getMessageText(message)
 
-      if (contenido.includes('https://')) {
-        await sock.sendMessage(jid, { delete: message.key })
-        return
+                        if (contenido.includes('https://')) {
+                          await sock.sendMessage(jid, { delete: message.key })
+                          console.log(`        [ 🗺️ ]  Mensaje eliminado por antilink: ${contenido}`)
+                          return
+                       }
+                      }
+                    } catch (error) {
+                      console.error('Error en antilink:', error)
+                    }
+                  }
       }
-    }
-  } catch (error) {
-    console.error('Error en antilink:', error)
-  }
-}
-
-          }
-        }
       }
-
       const text = getMessageText(message).trim()
       
       // Ejemplo: !ping o !menu
@@ -266,7 +264,7 @@ const args = commandText.slice(commandName.length).trimStart()
           text: `_*[  🔅  ] Error! el comando tuvo un error al ser ejecutado, puede que este corrupto....*_`
         })
       }
-    })
+      })
 
     sock.ev.on('group-participants.update', async (update) => {
     try {
