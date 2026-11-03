@@ -15,6 +15,7 @@ const { Boom } = require('@hapi/boom')
   const fs = require('fs')
   const path = require('path')
 
+  const antiLinkPath = path.join(__dirname, 'JSON/antilink.json')
   const PREFIX = '!'
   const logger = P({ level: 'silent' })
 
@@ -266,7 +267,7 @@ const args = commandText.slice(commandName.length).trimStart()
 
         if (action !== 'add' && action !== 'remove') return
 
-        const configPath = path.join(__dirname, 'config.json')
+        const configPath = path.join(__dirname, 'JSON/bienvenida.json')
 
         if (!fs.existsSync(configPath)) return
 
