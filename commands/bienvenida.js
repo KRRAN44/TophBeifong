@@ -46,7 +46,7 @@ module.exports = {
         console.log(`        [ 🗺️ ] Comando Bienvenida ejecutado con éxito, se configuró la bienvenida`);
         await sock.sendMessage(jid, {
             text: `═════════════
-*🪵            bienvenida*
+*🪵            BIENVENIDA*
 > _la bienvenida ha sido configurada con exito para este grupo_
 ═════════════
 

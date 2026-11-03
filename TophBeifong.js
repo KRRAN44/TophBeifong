@@ -16,6 +16,7 @@ const { Boom } = require('@hapi/boom')
   const path = require('path')
 
   const antiLinkPath = path.join(__dirname, 'JSON/antilink.json')
+  const mutesPath = path.join(__dirname, 'JSON/mutes.json')
   const PREFIX = '!'
   const logger = P({ level: 'silent' })
 
@@ -192,20 +193,25 @@ const color = {
         // Incrementar el contador de mensajes
         incrementarContador(jid, autor);
         
-        const configPath = path.join(__dirname, 'JSON/activos.json');
-
-        if (fs.existsSync(configPath)) {
-          const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-
-          // Usuario muteado: se borra el mensaje y no se sigue procesando
-          if (config.mutes?.[jid]?.[autor]) {
-            try {
-              await sock.sendMessage(jid, { delete: message.key });
-            } catch (error) {
-              console.error('Error al borrar mensaje de usuario muteado:', error);
+        // mute.js y unmute.js guardan el estado en JSON/mutes.json.
+        if (fs.existsSync(mutesPath)) {
+          try {
+            const mutesConfig = JSON.parse(fs.readFileSync(mutesPath, 'utf8'))
+            const messageText = getMessageText(message).trim()
+            const isUnmuteCommand = messageText.startsWith(`${PREFIX}unmute `) || messageText === `${PREFIX}unmute`
+            if (mutesConfig.mutes?.[jid]?.[autor] && !isUnmuteCommand) {
+              try {
+                await sock.sendMessage(jid, { delete: message.key })
+              } catch (error) {
+                console.error('Error al borrar mensaje de usuario muteado:', error)
+              }
+              return
             }
-            return;
+          } catch (error) {
+            console.error('Error al cargar mutes.json:', error)
           }
+        }
+
                     // Antilink: si está activado en el grupo, borra cualquier mensaje con https://
                     // Antilink: lee su propio archivo
                     if (fs.existsSync(antiLinkPath)) {
@@ -225,7 +231,6 @@ const color = {
                       console.error('Error en antilink:', error)
                     }
                   }
-      }
       }
       const text = getMessageText(message).trim()
       
@@ -272,7 +277,11 @@ const args = commandText.slice(commandName.length).trimStart()
 
         if (action !== 'add' && action !== 'remove') return
 
-        const configPath = path.join(__dirname, 'JSON/bienvenida.json')
+        // Las despedidas se guardan por separado de las bienvenidas.
+        const configPath = path.join(
+            __dirname,
+            action === 'add' ? 'JSON/bienvenida.json' : 'JSON/despedidas.json'
+        )
 
         if (!fs.existsSync(configPath)) return
 
