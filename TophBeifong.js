@@ -207,17 +207,24 @@ const color = {
             return;
           }
                     // Antilink: si está activado en el grupo, borra cualquier mensaje con https://
-          if (config.antilink?.[jid]?.enabled) {
-            const contenido = getMessageText(message);
+        // Antilink: lee su propio archivo
+if (fs.existsSync(antilinkPath)) {
+  try {
+    const antilinkConfig = JSON.parse(fs.readFileSync(antilinkPath, 'utf8'))
 
-            if (contenido.includes('https://')) {
-              try {
-                await sock.sendMessage(jid, { delete: message.key });
-              } catch (error) {
-                console.error('Error al borrar mensaje con link:', error);
-              }
-              return;
-            }
+    if (antilinkConfig.antilink?.[jid]?.enabled) {
+      const contenido = getMessageText(message)
+
+      if (contenido.includes('https://')) {
+        await sock.sendMessage(jid, { delete: message.key })
+        return
+      }
+    }
+  } catch (error) {
+    console.error('Error en antilink:', error)
+  }
+}
+
           }
         }
       }
