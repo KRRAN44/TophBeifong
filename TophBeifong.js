@@ -20,6 +20,8 @@ const { Boom } = require('@hapi/boom')
   const PREFIX = '!'
   const logger = P({ level: 'silent' })
 
+  const miembrosPath = path.join(__dirname, 'JSON/miembros.json')
+
   // Funciones para manejar el contador de mensajes
   function cargarActivos() {
     const activosPath = path.join(__dirname, 'JSON/activos.json')
@@ -277,6 +279,14 @@ const args = commandText.slice(commandName.length).trimStart()
 
         if (action !== 'add' && action !== 'remove') return
 
+        if (action === 'add') {
+          try {
+            await guardarMiembros(sock, id, participants)
+          } catch (error) {
+            console.error('Error al guardar miembros.json:', error)
+          }
+        }
+        
         // Las despedidas se guardan por separado de las bienvenidas.
         const configPath = path.join(
             __dirname,
