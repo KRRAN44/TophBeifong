@@ -5,8 +5,8 @@ const miembrosPath = path.join(__dirname, '../JSON/miembros.json')
 
 // ⚙️ AJUSTES: cuántos números se añaden por tanda y cuánto se espera entre una tanda y otra.
 // Entre más despacio, menos riesgo de que WhatsApp se moleste con el bot.
-const POR_TANDA = 5
-const PAUSA_MS = 15000 // 15 segundos
+const POR_TANDA = 1
+const PAUSA_MS = 120000 // 2 minutos
 
 // Grupos donde ya hay un proceso corriendo (para no lanzar dos a la vez)
 const enCurso = new Set()
