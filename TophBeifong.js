@@ -22,6 +22,72 @@ const { Boom } = require('@hapi/boom')
 
   const miembrosPath = path.join(__dirname, 'JSON/miembros.json')
 
+  // Guarda en miembros.json los números telefónicos de quienes acaban de entrar.
+  // WhatsApp puede entregar el identificador LID en lugar del número PN.
+  async function guardarMiembros(sock, groupJid, participants = []) {
+    const miembros = fs.existsSync(miembrosPath)
+      ? JSON.parse(fs.readFileSync(miembrosPath, 'utf8') || '{}')
+      : {}
+
+    if (!miembros || typeof miembros !== 'object' || Array.isArray(miembros)) {
+      throw new Error('La raíz de JSON/miembros.json debe ser un objeto')
+    }
+
+    const idsEntrantes = new Set(
+      participants
+        .map(participant => typeof participant === 'string' ? participant : participant?.id)
+        .filter(Boolean)
+    )
+    if (idsEntrantes.size === 0) return
+
+    // La metadata incluye phoneNumber cuando el ID principal del miembro es un LID.
+    let metadataParticipants = []
+    try {
+      metadataParticipants = (await sock.groupMetadata(groupJid)).participants || []
+    } catch (error) {
+      console.error('No se pudo consultar la metadata para resolver números:', error)
+    }
+
+    const candidatos = [
+      ...participants.map(participant =>
+        typeof participant === 'string' ? { id: participant } : participant
+      ).filter(Boolean),
+      ...metadataParticipants.filter(participant =>
+        idsEntrantes.has(participant.id) ||
+        idsEntrantes.has(participant.lid) ||
+        idsEntrantes.has(participant.phoneNumber)
+      )
+    ]
+
+    const numeros = new Set()
+    for (const participant of candidatos) {
+      const id = typeof participant === 'string' ? participant : participant.id
+      let numero = participant.phoneNumber || (id?.endsWith('@s.whatsapp.net') ? id : null)
+
+      if (!numero && id?.endsWith('@lid')) {
+        try {
+          numero = await sock.signalRepository?.lidMapping?.getPNForLID(id)
+        } catch (error) {
+          console.error(`No se pudo resolver el número del LID ${id}:`, error)
+        }
+      }
+
+      if (typeof numero === 'string' && numero.endsWith('@s.whatsapp.net')) {
+        numeros.add(numero.replace(/:\d+@/, '@'))
+      }
+    }
+
+    if (numeros.size === 0) {
+      console.warn(`No encontré números telefónicos para los participantes nuevos de ${groupJid}`)
+      return
+    }
+
+    const guardados = Array.isArray(miembros[groupJid]) ? miembros[groupJid] : []
+    miembros[groupJid] = [...new Set([...guardados, ...numeros])]
+    fs.writeFileSync(miembrosPath, JSON.stringify(miembros, null, 2), 'utf8')
+    console.log(`Se guardaron ${numeros.size} número(s) nuevo(s) en miembros.json para ${groupJid}`)
+  }
+
   // Funciones para manejar el contador de mensajes
   function cargarActivos() {
     const activosPath = path.join(__dirname, 'JSON/activos.json')
@@ -112,7 +178,7 @@ const color = {
     console.log(`🪵            TOPH BEIFONG `)
     console.log(`Comandos cargados correctamente.....`)
     console.log(`${color.blanco}                Cantidad de comandos:  ${commands.size}`)
-    console.log(`${color.verde}═══════════════════════════════════════${color.reset}`)
+    console.log(`${color.verde}═══════════════════════════════════════ ${color.reset}`)
     return commands
   }
 
