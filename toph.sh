@@ -19,7 +19,6 @@ echo -e "${RED}
              |  [ 5 ] : Mostrar Sugerencias            |
              |  [ 6 ] : Eliminar Sugerencias           |
              |  [ 7 ] : Salir de la terminal           |
-             |  [ 8 ] : Empezar menu de parasito...    |
              ╰─────────────────────────────────────────╯${NOCOLOR}"
                                  
 1() {
@@ -72,8 +71,4 @@ node TophBeifong.js
 7() {
   echo -e "${CYAN}[🍀] $ SALIENDO....${NOCOLOR}"
   exit 0
-}
-8() {
-  echo -e "${CYAN}[🍀] $ MENU SECONCY ${NOCOLOR}"
-  source seconcy.sh
 }

@@ -41,7 +41,9 @@ module.exports = {
             const LIMITE = 30;
             let mensaje = `═════════════════
 *🪵            CONTADOR DE MENSAJES*
-> _Cantidad minima de mensajes:_ *${LIMITE}*\n> _Cantidad de miembros:_ *${usuarios.length}*\n═════════════════`;
+> _Cantidad minima de mensajes:_ *${LIMITE}*\n> _Cantidad de miembros:_ *${usuarios.length}*\n═════════════════ 
+
+`;
             
             console.log(`        [ 🗺️ ] Comando Contador ejecutado con éxito, se envió el conteo al grupo`);
 
