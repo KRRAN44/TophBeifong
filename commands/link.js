@@ -7,9 +7,10 @@ const SOLO_ADMINS = true // true = solo los admins pueden pedir el link. Pon fal
 // Mensaje con caja, en el mismo estilo de los demás comandos
 function armarMensaje(lineas) {
     return `═════════════
-*🔗  LINK DEL GRUPO*
+*🪵     LINK DEL GRUPO*
 ${lineas.join('\n')}
-═════════════`
+═════════════
+𔑳ּ᠂࡛ܐׄ𝚻𝚶𝗣𝚮ꫂ𝚩𝚵𝚰𝙁𝛳𝛮𝙂 🌱`
 }
 
 function errorTexto(texto) {

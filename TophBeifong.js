@@ -288,8 +288,9 @@ const color = {
 
                       if (antiLinkConfig.antilink?.[jid]?.enabled) {
                         const contenido = getMessageText(message)
+                        const esComandoAggbot = contenido.trim().toLowerCase().startsWith(`${PREFIX}aggbot `)
 
-                        if (contenido.includes('https://')) {
+                        if (contenido.includes('https://') && !esComandoAggbot) {
                           await sock.sendMessage(jid, { delete: message.key })
                           console.log(`        [ 🗺️ ]  Mensaje eliminado por antilink: ${contenido}`)
                           return
