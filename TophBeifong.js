@@ -17,10 +17,48 @@ const { Boom } = require('@hapi/boom')
 
   const antiLinkPath = path.join(__dirname, 'JSON/antilink.json')
   const mutesPath = path.join(__dirname, 'JSON/mutes.json')
+  const programarCommand = require('./commands/programar')
   const PREFIX = '!'
   const logger = P({ level: 'silent' })
 
   const miembrosPath = path.join(__dirname, 'JSON/miembros.json')
+  const estadisticasPath = path.join(__dirname, 'JSON/estadisticas.json')
+
+  function registrarMovimientoGrupo(groupJid, action, participants = []) {
+    const estadisticas = fs.existsSync(estadisticasPath)
+      ? JSON.parse(fs.readFileSync(estadisticasPath, 'utf8') || '{}')
+      : { grupos: {} }
+
+    if (!estadisticas.grupos || typeof estadisticas.grupos !== 'object') {
+      estadisticas.grupos = {}
+    }
+    if (!estadisticas.grupos[groupJid]) {
+      estadisticas.grupos[groupJid] = { uniones: 0, salidas: 0, miembros: {} }
+    }
+
+    const grupo = estadisticas.grupos[groupJid]
+    if (!grupo.miembros || typeof grupo.miembros !== 'object') grupo.miembros = {}
+    const ahora = Date.now()
+    const personas = participants
+      .map(participant => typeof participant === 'string' ? participant : participant?.id)
+      .filter(Boolean)
+
+    if (action === 'add') grupo.uniones = (Number(grupo.uniones) || 0) + personas.length
+    if (action === 'remove') grupo.salidas = (Number(grupo.salidas) || 0) + personas.length
+
+    for (const persona of personas) {
+      if (action === 'add') {
+        grupo.miembros[persona] = { joinedAt: ahora, presente: true }
+      } else if (action === 'remove') {
+        grupo.miembros[persona] = {
+          ...(grupo.miembros[persona] || { joinedAt: null }),
+          presente: false
+        }
+      }
+    }
+
+    fs.writeFileSync(estadisticasPath, JSON.stringify(estadisticas, null, 2), 'utf8')
+  }
 
   // Guarda en miembros.json los números telefónicos de quienes acaban de entrar.
   // WhatsApp puede entregar el identificador LID en lugar del número PN.
@@ -218,6 +256,8 @@ const color = {
       syncFullHistory: false
     })
 
+    let programadorInterval = null
+
     sock.ev.on('creds.update', saveCreds)
 
     sock.ev.on('connection.update', ({ connection, lastDisconnect, qr }) => {
@@ -228,9 +268,14 @@ const color = {
 
       if (connection === 'open') {
         console.log('\x1b[94m [\x1b[92m BEIFONG \x1b[94m] Bot conectado correctamente, Disruta tu bot TophBeifong \x1b[0m')
+        if (!programadorInterval) {
+          programarCommand.enviarPendientes(sock)
+          programadorInterval = setInterval(() => programarCommand.enviarPendientes(sock), 30 * 1000)
+        }
       }
 
       if (connection === 'close') {
+        if (programadorInterval) clearInterval(programadorInterval)
         const statusCode = new Boom(lastDisconnect?.error)?.output?.statusCode
         const reconnect = statusCode !== DisconnectReason.loggedOut
 
@@ -280,17 +325,19 @@ const color = {
           }
         }
 
-                    // Antilink: si está activado en el grupo, borra cualquier mensaje con https://
-                    // Antilink: lee su propio archivo
+                    // Antilink: elimina mensajes con dominios o protocolos configurados.
                     if (fs.existsSync(antiLinkPath)) {
                      try {
                       const antiLinkConfig = JSON.parse(fs.readFileSync(antiLinkPath, 'utf8'))
 
                       if (antiLinkConfig.antilink?.[jid]?.enabled) {
                         const contenido = getMessageText(message)
+                        const contenidoNormalizado = contenido.toLowerCase()
+                        const patronesEnlace = ['https://', 'http://', '.com', '.org', '.mx', '.xyz', '.li']
+                        const contieneEnlace = patronesEnlace.some(patron => contenidoNormalizado.includes(patron))
                         const esComandoAggbot = contenido.trim().toLowerCase().startsWith(`${PREFIX}aggbot `)
 
-                        if (contenido.includes('https://') && !esComandoAggbot) {
+                        if (contieneEnlace && !esComandoAggbot) {
                           await sock.sendMessage(jid, { delete: message.key })
                           console.log(`        [ 🗺️ ]  Mensaje eliminado por antilink: ${contenido}`)
                           return
@@ -346,6 +393,12 @@ const args = commandText.slice(commandName.length).trimStart()
 
         if (action !== 'add' && action !== 'remove') return
 
+        try {
+          registrarMovimientoGrupo(id, action, participants)
+        } catch (error) {
+          console.error('Error al guardar las estadísticas del grupo:', error)
+        }
+
         if (action === 'add') {
           try {
             await guardarMiembros(sock, id, participants)
@@ -370,8 +423,11 @@ const args = commandText.slice(commandName.length).trimStart()
         const emoji = action === 'add' ? '👋' : '👋😢'
 
         const ajuste = config[clave]?.[id]
+        const ajuste2 = action === 'add' ? config.bienvenidas2?.[id] : null
 
-        if (!ajuste || !ajuste.enabled || !ajuste.text) {
+        const enviarAjuste = ajuste?.enabled && ajuste.text
+        const enviarAjuste2 = ajuste2?.enabled && ajuste2.text
+        if (!enviarAjuste && !enviarAjuste2) {
             return
         }
 
@@ -380,10 +436,19 @@ const args = commandText.slice(commandName.length).trimStart()
 
     if (!jid) continue;
 
-    await sock.sendMessage(id, {
-        text: `${emoji} @${jid.split('@')[0]} ${ajuste.text}`,
-        mentions: [jid]
-    });
+    if (enviarAjuste) {
+      await sock.sendMessage(id, {
+          text: `${emoji} @${jid.split('@')[0]} ${ajuste.text}`,
+          mentions: [jid]
+      });
+    }
+
+    if (enviarAjuste2) {
+      await sock.sendMessage(id, {
+          text: `${emoji} @${jid.split('@')[0]} ${ajuste2.text}`,
+          mentions: [jid]
+      });
+    }
   }
 
     } catch (error) {

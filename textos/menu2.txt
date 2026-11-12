@@ -19,6 +19,11 @@
  `┆🥥⃟ꪶ┄꯭ !link` - *Saca el link del grupo*
  
  `┆🥥⃟ꪶ┄꯭ !aggbot (link)` - *Añade al bot a un grupo*
+
+ `┆🥥⃟ꪶ┄꯭ !estadisticas` - *Muestra las estadisticas del grupo*
+
+ `┆🥥⃟ꪶ┄꯭ !notifyadm` - *Al mencionar un mensaje: envia ese mensaje al grupo de admins para su revision...*
+ 
  ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 ┏━━╸╸╸╸╸╸╸╯🎍╭͢
 ┗┅┅┅┛১ 

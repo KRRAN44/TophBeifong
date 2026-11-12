@@ -42,6 +42,13 @@
 
  `┆🥥⃟ꪶ┄꯭ !cerrar` - *Cierra el grupo*
  `┆🥥⃟ꪶ┄꯭ !abrir` - *Abre el grupo*
+
+ `┆🥥⃟ꪶ┄꯭ !Programar (texto)` - *Guarda el texto y lo reenvia al chat ejecutado en lapsos de 1 hora*
+
+ `┆🥥⃟ꪶ┄꯭ !SetAdm (link)` - *Reconoce el grupo mencionado cono grupo de admins, ahi se envian los mensajes de notifyadm...*
+
+ `┆🥥⃟ꪶ┄꯭ !Bienvenida2` - *Establece una segunda bienvenida*
+ `┆🥥⃟ꪶ┄꯭ !#Bienvenida2` - *Activa o desactiva la segunda bienvenida*
  ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 ┏━━╸╸╸╸╸╸╸╯🎍╭͢
 ┗┅┅┅┛১ 

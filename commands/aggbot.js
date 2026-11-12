@@ -34,7 +34,7 @@ module.exports = {
 
             await sock.sendMessage(jid, {
                 text: `═════════════
-*🪵            aggbot*
+*🪵            AGGBOT*
 > _el bot entro al grupo con exito_
 ═════════════
 𔑳ּ᠂࡛ܐׄ𝚻𝚶𝗣𝚮ꫂ𝚩𝚵𝚰𝙁𝛳𝛮𝙂 🌱`
