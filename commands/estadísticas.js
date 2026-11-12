@@ -68,11 +68,16 @@ module.exports = {
             const mostrarMiembro = miembro => miembro
                 ? `@${miembro.numero} (${miembro.mensajes} mensajes)`
                 : 'Sin miembros';
-            const lista = `• Personas que se han unido: *${Number(statsGrupo.uniones) || 0}*\n` +
-                `• Personas que han salido: *${Number(statsGrupo.salidas) || 0}*\n` +
-                `• Mensajes enviados al grupo: *${mensajes}*\n` +
-                `• Miembro más activo: *${mostrarMiembro(activo)}*\n` +
-                `• Miembro más inactivo: *${mostrarMiembro(inactivo)}*`;
+            const lista = 
+                `> _*[ 🌊 ] . . Personas que se han unido:*_ *${Number(statsGrupo.uniones) || 0}*\n` +
+                `*------ ---- ----- - --*`
+                `> _*[ 🌊 ] . .  Personas que han salido:*_ *${Number(statsGrupo.salidas) || 0}*\n` +
+                `*------- ----------- --*`
+                `> _*[ 🌊 ] . .  Mensajes enviados al grupo:*_ *${mensajes}*\n` +
+                `*------- --- -------------*`
+                `> _*[ 🌊 ] . .  Miembro más activo:*_ *${mostrarMiembro(activo)}*\n` +
+                `*----- -- -- ----------*`
+                `> _*[ 🌊 ] . .  Miembro más inactivo:*_ *${mostrarMiembro(inactivo)}*`;
 
             await sock.sendMessage(jid, {
                 text: `═════════════
