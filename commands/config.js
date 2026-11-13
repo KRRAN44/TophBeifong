@@ -6,11 +6,15 @@ const VERDE = '\x1b[32m';
 const ROJO = '\x1b[31m';
 const RESET = '\x1b[0m';
 
-// ¿La entrada del grupo cuenta como "activa"?
-// Una lista con algo adentro, o un objeto que no esté apagado con enabled: false
-const existe = entrada => Array.isArray(entrada)
-    ? entrada.length > 0
-    : Boolean(entrada) && entrada.enabled !== false;
+const tieneTexto = entrada =>
+    typeof entrada?.text === 'string' && entrada.text.trim().length > 0;
+
+const estadoConTexto = entrada => {
+    if (!tieneTexto(entrada)) return 'No configurado';
+    return entrada.enabled === false
+        ? 'Configurado (desactivado)'
+        : 'Configurado (activado)';
+};
 
 // ─────────────────────────────────────────────────────────────
 // Las configuraciones que muestra !settings (en este orden).
@@ -22,46 +26,50 @@ const existe = entrada => Array.isArray(entrada)
 // ─────────────────────────────────────────────────────────────
 const AJUSTES = [
     {
-        // { "antilink": { "<grupo>": { "enabled": true } } }
+        // { "antilink": { "<grupo>": { "enabled": true|false } } }
         nombre: 'Antilink',
         archivos: ['antilink.json'],
         llaves: ['antilink'],
-        cuenta: entrada => entrada.enabled === true
+        estado: entrada => typeof entrada?.enabled === 'boolean'
+            ? (entrada.enabled ? 'Configurado (activado)' : 'Configurado (desactivado)')
+            : 'No configurado'
     },
     {
         // { "bienvenidas": { "<grupo>": { "text": "...", "enabled": true } } }
         nombre: 'Bienvenida',
         archivos: ['bienvenida.json'],
         llaves: ['bienvenidas'],
-        cuenta: entrada => entrada.enabled === true && Boolean(entrada.text)
+        estado: estadoConTexto
     },
     {
-        // { "despedidas": { "<grupo>": { "text": "...", "enabled": true } } }  (mismo archivo que bienvenida)
+        // { "despedidas": { "<grupo>": { "text": "...", "enabled": true } } }
         nombre: 'Despedida',
-        archivos: ['bienvenida.json'],
+        archivos: ['despedidas.json'],
         llaves: ['despedidas'],
-        cuenta: entrada => entrada.enabled === true && Boolean(entrada.text)
+        estado: estadoConTexto
     },
     {
-        // ⚠️ SUPUESTO: no he visto este comando, así que busco en los nombres más probables
+        // { "grupos": { "<grupo>": { "text": "...", "enabled": true, "nextSendAt": 0 } } }
         nombre: 'Programar',
-        archivos: ['programar.json', 'programados.json', 'programaciones.json'],
-        llaves: ['programar', 'programados', 'programaciones'],
-        cuenta: existe
+        archivos: ['msg-programados.json'],
+        llaves: ['grupos'],
+        estado: estadoConTexto
     },
     {
-        // ⚠️ SUPUESTO: no he visto este comando, así que busco en los nombres más probables
+        // { "bienvenidas2": { "<grupo>": { "text": "...", "enabled": true } } }
         nombre: 'Bienvenida2',
-        archivos: ['bienvenida2.json', 'bienvenida.json'],
-        llaves: ['bienvenidas2', 'bienvenida2'],
-        cuenta: existe
+        archivos: ['bienvenida.json'],
+        llaves: ['bienvenidas2'],
+        estado: estadoConTexto
     },
     {
         // { "parejas": { "<grupo remitente>": { "remitente": "...", "grupoId": "<grupo receptor>", "grupo": "..." } } }
         nombre: 'SetAdm',
         archivos: ['adm-notificaciones.json'],
         llaves: ['parejas'],
-        cuenta: entrada => String(entrada.grupoId || '').endsWith('@g.us')
+        estado: entrada => String(entrada?.grupoId || '').endsWith('@g.us')
+            ? 'Configurado'
+            : 'No configurado'
     }
 ];
 
@@ -88,22 +96,25 @@ function crearLector() {
 // Saca lo que hay anotado para ESTE grupo (si el JSON es un objeto por grupo, o una lista con el grupo adentro)
 function entradaDelGrupo(valor, jid) {
     if (Array.isArray(valor)) {
-        return valor.filter(item => item && [item.jid, item.grupo, item.grupoId, item.groupId, item.id].includes(jid));
+        return valor.find(item => item && [item.jid, item.grupo, item.grupoId, item.groupId, item.id].includes(jid));
     }
     return valor?.[jid];
 }
 
-function estaConfigurado(ajuste, jid, leer) {
+function estadoAjuste(ajuste, jid, leer) {
     for (const archivo of ajuste.archivos) {
         const datos = leer(archivo);
         if (!datos || typeof datos !== 'object') continue;
 
         for (const llave of ajuste.llaves) {
             const entrada = entradaDelGrupo(datos[llave], jid);
-            if (entrada && ajuste.cuenta(entrada)) return true;
+            if (entrada) {
+                const estado = ajuste.estado(entrada);
+                if (estado !== 'No configurado') return estado;
+            }
         }
     }
-    return false;
+    return 'No configurado';
 }
 
 // Línea separadora de tamaño al azar, por ejemplo: *——— —- -*
@@ -132,7 +143,7 @@ module.exports = {
             const leer = crearLector();
 
             const lineas = AJUSTES.map(ajuste => {
-                const estado = estaConfigurado(ajuste, jid, leer) ? 'Configurado' : 'No configurado';
+                const estado = estadoAjuste(ajuste, jid, leer);
                 return `> _*[ 🐸 ] ${ajuste.nombre}: ${estado}*_`;
             });
 
