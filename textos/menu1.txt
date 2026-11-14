@@ -44,6 +44,7 @@
  `┆🥥⃟ꪶ┄꯭ !abrir` - *Abre el grupo*
 
  `┆🥥⃟ꪶ┄꯭ !Programar (texto)` - *Guarda el texto y lo reenvia al chat ejecutado en lapsos de 1 hora*
+ `┆🥥⃟ꪶ┄꯭ !#Programar` - *Activa o Desactiva el mensaje programado*
 
  `┆🥥⃟ꪶ┄꯭ !SetAdm (link)` - *Reconoce el grupo mencionado cono grupo de admins, ahi se envian los mensajes de notifyadm...*
 

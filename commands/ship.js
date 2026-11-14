@@ -46,6 +46,15 @@ module.exports = {
             "Love is in the air ✨💫",
             "parecen una pareja de series de frutas hechas con IA 😍",
             "no se aman, se odian, deberian hacer pvp 😈",
+            "Los dos son homosexuales 🌈🏳️‍🌈",
+            "ni idea, q se maten o algo 🤷‍♀️",
+            "son el six para el seven ❤️❤️❤️",
+            "les va a ir bien, se van a casar y el siguiente año van a tener un bb 🐣",
+            "deberían ser amigos con derechos 🥵😳",
+            "son novios, pero uno se está cogiendo una trans 🐸🥴🤣",
+            "deberían tener sexo anal ❤️‍🔥",
+            "ni se topan 💔",
+            "in another life 💔💞",
         ];
 
         // Elegir un mensaje al azar
