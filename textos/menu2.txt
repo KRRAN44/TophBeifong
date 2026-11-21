@@ -14,7 +14,7 @@
 
  `┆🥥⃟ꪶ┄꯭ !ship` - *Menciona dos miembros y los shipea*
 
- `┆🥥⃟ꪶ┄꯭ !org` - *Menciona de 4 a 9 miembros al azar con una frase de ship*
+ `┆🥥⃟ꪶ┄꯭ !orgia` - *Menciona de 4 a 9 miembros y crea una orgia*
  
  `┆🥥⃟ꪶ┄꯭ !sug` - *Envia una sugerencia al admin*
 
@@ -23,6 +23,8 @@
  `┆🥥⃟ꪶ┄꯭ !aggbot (link)` - *Añade al bot a un grupo*
 
  `┆🥥⃟ꪶ┄꯭ !estadisticas` - *Muestra las estadisticas del grupo*
+
+ `┆🥥⃟ꪶ┄꯭ !invite (numero)` - *Invita a alguien al grupo*
 
  `┆🥥⃟ꪶ┄꯭ !notifyadm` - *Al mencionar un mensaje: envia ese mensaje al grupo de admins para su revision...*
  
