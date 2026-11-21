@@ -1,3 +1,5 @@
+const { getTargetUser } = require('./targetUser');
+
 module.exports = { name: 'demote', aliases: ['quitaradmin'], async execute({ sock, message, jid }) {
 // Solo funciona en grupos
 if (!jid.endsWith('@g.us')) {
@@ -47,16 +49,13 @@ if (!botIsAdmin) {
 }
 
 // Obtener persona mencionada
-const mentioned =
-    message?.message?.extendedTextMessage?.contextInfo?.mentionedJid;
+const userToDemote = getTargetUser(message, participants);
 
-if (!mentioned || mentioned.length === 0) {
+if (!userToDemote) {
     return await sock.sendMessage(jid, {
-        text: `> *_[ 🍤 ] menciona a alguien para quitar el administrador...._*`
+        text: `> *_[ 🍤 ] menciona a alguien o responde a su mensaje para quitarle el administrador...._*`
     });
 }
-
-const userToDemote = mentioned[0];
 
 // Comprobar que sí sea admin (si no, no hay nada que quitar)
 const targetData = participants.find(

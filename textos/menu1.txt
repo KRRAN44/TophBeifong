@@ -48,6 +48,12 @@
 
  `┆🥥⃟ꪶ┄꯭ !SetAdm (link)` - *Reconoce el grupo mencionado cono grupo de admins, ahi se envian los mensajes de notifyadm...*
 
+ `┆🥥⃟ꪶ┄꯭ !invite (numero)` - *Envía por privado el link del grupo a un número (solo admins)*
+
+ `┆🥥⃟ꪶ┄꯭ !anunciar (mensaje)` - *Envía un anuncio a todos los grupos (solo números autorizados)*
+
+ `┆🥥⃟ꪶ┄꯭ !No_incluir` - *Alterna si este grupo recibe anuncios masivos (solo admins del grupo)*
+
  `┆🥥⃟ꪶ┄꯭ !Bienvenida2` - *Establece una segunda bienvenida*
  `┆🥥⃟ꪶ┄꯭ !#Bienvenida2` - *Activa o desactiva la segunda bienvenida*
  ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈

@@ -1,3 +1,5 @@
+const { getTargetUser } = require('./targetUser');
+
 module.exports = { name: 'promote', aliases: ['daradmin'],
 async execute({ sock, message, jid }) {
 
@@ -48,16 +50,13 @@ const botIsAdmin =
     }
 
     // Obtener persona mencionada
-    const mentioned =
-        message?.message?.extendedTextMessage?.contextInfo?.mentionedJid;
+    const userToPromote = getTargetUser(message, participants);
 
-    if (!mentioned || mentioned.length === 0) {
+    if (!userToPromote) {
         return await sock.sendMessage(jid, {
-            text: `> *_[ 🍤 ] menciona a alguien para ascender a administrador...._*`
+            text: `> *_[ 🍤 ] menciona a alguien o responde a su mensaje para ascenderlo a administrador...._*`
         });
     }
-
-    const userToPromote = mentioned[0];
 
     // Comprobar si ya es admin
     const targetData = participants.find(

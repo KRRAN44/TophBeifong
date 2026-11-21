@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { getTargetUser } = require('./targetUser');
 
 const configPath = path.join(__dirname, '../JSON/warns.json');
 
@@ -28,16 +29,13 @@ module.exports = {
             });
         }
 
-        const mentioned =
-            message?.message?.extendedTextMessage?.contextInfo?.mentionedJid;
+        const userToUnwarn = getTargetUser(message, participants);
 
-        if (!mentioned || mentioned.length === 0) {
+        if (!userToUnwarn) {
             return sock.sendMessage(jid, {
-                text: `> *_[ 🍤 ] ERROR! Debes mencionar a un usuario para quitarle una advertencia..._*`
+                text: `> *_[ 🍤 ] ERROR! Menciona a un usuario o responde a su mensaje para quitarle una advertencia..._*`
             });
         }
-
-        const userToUnwarn = mentioned[0];
 
         let config = {};
         if (fs.existsSync(configPath)) {

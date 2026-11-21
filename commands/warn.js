@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { getTargetUser } = require('./targetUser');
 const configPath = path.join(__dirname, '../JSON/warns.json');
 const MAX_WARNS = 4;
 
@@ -28,16 +29,13 @@ module.exports = {
             });
         }
 
-        const mentioned =
-            message?.message?.extendedTextMessage?.contextInfo?.mentionedJid;
+        const userToWarn = getTargetUser(message, participants);
 
-        if (!mentioned || mentioned.length === 0) {
+        if (!userToWarn) {
             return sock.sendMessage(jid, {
-                text: `> *_[ 🍤 ] ERROR! Debes mencionar a un usuario para advertirlo..._*`
+                text: `> *_[ 🍤 ] ERROR! Menciona a un usuario o responde a su mensaje para advertirlo..._*`
             });
         }
-
-        const userToWarn = mentioned[0];
 
         let config = {};
         if (fs.existsSync(configPath)) {

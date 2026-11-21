@@ -53,6 +53,24 @@
           "presente": true
         }
       }
+    },
+    "120363430210370033@g.us": {
+      "uniones": 2,
+      "salidas": 2,
+      "miembros": {
+        "125753052160147@lid": {
+          "joinedAt": 1795215059051,
+          "presente": true
+        },
+        "19396659548237@lid": {
+          "joinedAt": 1795215003857,
+          "presente": true
+        },
+        "29898072698925@lid": {
+          "joinedAt": null,
+          "presente": false
+        }
+      }
     }
   }
 }

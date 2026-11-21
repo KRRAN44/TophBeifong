@@ -13,6 +13,8 @@
  `┆🥥⃟ꪶ┄꯭ !s` - *Citando una imagen, genera un sticker*
 
  `┆🥥⃟ꪶ┄꯭ !ship` - *Menciona dos miembros y los shipea*
+
+ `┆🥥⃟ꪶ┄꯭ !org` - *Menciona de 4 a 9 miembros al azar con una frase de ship*
  
  `┆🥥⃟ꪶ┄꯭ !sug` - *Envia una sugerencia al admin*
 
